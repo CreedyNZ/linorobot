@@ -20,6 +20,12 @@
 #include "Kinematics.h"
 #include "PID.h"
 
+#include <FreqMeasureMulti.h>
+
+// Measure 3 frequencies at the same time! :-)
+FreqMeasureMulti freqL;
+FreqMeasureMulti freq2;
+
 
 #define COMMAND_RATE 20 //hz
 #define DEBUG_RATE 5
@@ -28,13 +34,11 @@ Servo steering_servo;
 
 Controller motor1_controller(Controller::MOTOR_DRIVER, MOTOR1_PWM, MOTOR1_IN_A, MOTOR1_IN_B);
 Controller motor2_controller(Controller::MOTOR_DRIVER, MOTOR2_PWM, MOTOR2_IN_A, MOTOR2_IN_B); 
-Controller motor3_controller(Controller::MOTOR_DRIVER, MOTOR3_PWM, MOTOR3_IN_A, MOTOR3_IN_B);
-Controller motor4_controller(Controller::MOTOR_DRIVER, MOTOR4_PWM, MOTOR4_IN_A, MOTOR4_IN_B);
+
 
 PID motor1_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
 PID motor2_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
-PID motor3_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
-PID motor4_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
+
 
 Kinematics kinematics(Kinematics::LINO_BASE, MAX_RPM, WHEEL_DIAMETER, FR_WHEELS_DISTANCE, LR_WHEELS_DISTANCE);
 
@@ -66,6 +70,10 @@ void setup()
     nh.subscribe(pid_sub);
     nh.subscribe(cmd_sub);
     nh.advertise(raw_vel_pub);
+    
+    delay(10);
+    freqL.begin(7);
+    freqR.begin(8);
 
     while (!nh.connected())
     {
@@ -114,8 +122,7 @@ void PIDCallback(const lino_msgs::PID& pid)
     //this callback receives pid object where P,I, and D constants are stored
     motor1_pid.updateConstants(pid.p, pid.i, pid.d);
     motor2_pid.updateConstants(pid.p, pid.i, pid.d);
-    motor3_pid.updateConstants(pid.p, pid.i, pid.d);
-    motor4_pid.updateConstants(pid.p, pid.i, pid.d);
+
 }
 
 void commandCallback(const geometry_msgs::Twist& cmd_msg)
@@ -135,31 +142,19 @@ void moveBase()
     Kinematics::rpm req_rpm = kinematics.getRPM(g_req_linear_vel_x, g_req_linear_vel_y, g_req_angular_vel_z);
 
     //get the current speed of each motor
-    int current_rpm1 = 2;
-    int current_rpm2 = 2;
-    int current_rpm3 = 2;
-    int current_rpm4 = 2;
+    int current_rpm1 = freqL.read();
+    int current_rpm2 = freqR.read();
 
     //the required rpm is capped at -/+ MAX_RPM to prevent the PID from having too much error
     //the PWM value sent to the motor driver is the calculated PID based on required RPM vs measured RPM
     motor1_controller.spin(motor1_pid.compute(req_rpm.motor1, current_rpm1));
     motor2_controller.spin(motor2_pid.compute(req_rpm.motor2, current_rpm2));
-    motor3_controller.spin(motor3_pid.compute(req_rpm.motor3, current_rpm3));  
-    motor4_controller.spin(motor4_pid.compute(req_rpm.motor4, current_rpm4));    
+   
 
     Kinematics::velocities current_vel;
-
-    if(kinematics.base_platform == Kinematics::ACKERMANN || kinematics.base_platform == Kinematics::ACKERMANN1)
-    {
-        float current_steering_angle;
-        
-        current_steering_angle = steer(g_req_angular_vel_z);
-        current_vel = kinematics.getVelocities(current_steering_angle, current_rpm1, current_rpm2);
-    }
-    else
-    {
-        current_vel = kinematics.getVelocities(current_rpm1, current_rpm2, current_rpm3, current_rpm4);
-    }
+    
+    current_vel = kinematics.getVelocities(current_rpm1, current_rpm2, current_rpm3, current_rpm4);
+    
     
     //pass velocities to publisher object
     raw_vel_msg.linear_x = current_vel.linear_x;
