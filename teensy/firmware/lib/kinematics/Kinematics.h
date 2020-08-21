@@ -43,8 +43,6 @@ class Kinematics
         {
             int motor1;
             int motor2;
-            int motor3;
-            int motor4;
         };
         
         struct velocities
@@ -58,13 +56,11 @@ class Kinematics
         {
             int motor1;
             int motor2;
-            int motor3;
-            int motor4;
         };
 
         Kinematics(base robot_base, int motor_max_rpm, float wheel_diameter, float wheels_x_distance, float wheels_y_distance);
         velocities getVelocities(float steering_angle, int rpm1, int rpm2);
-        velocities getVelocities(int rpm1, int rpm2, int rpm3, int rpm4);
+        velocities getVelocities(int rpm1, int rpm2);
         rpm getRPM(float linear_x, float linear_y, float angular_z);
 
     private:

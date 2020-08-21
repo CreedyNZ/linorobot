@@ -8,6 +8,8 @@
     <!-- IMU Relay and Filter -->
     <include file="$(find linorobot)/launch/include/imu/imu.launch" />
 
+   <include file="$(find linorobot)/launch/include/teleop.launch" />
+
     <!-- Publish Linorobot odometry -->
     <node pkg="linorobot" name="lino_base_node" type="lino_base_node"></node>
 
