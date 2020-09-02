@@ -14,8 +14,8 @@
 #define K_D 0.1 // D constant
 
 //define your robot' specs here
-#define MAX_RPM 3000              // motor's maximum RPM
-#define COUNTS_PER_REV 1550       // wheel encoder's no of ticks per rev
+#define MAX_RPM 300              // motor's maximum RPM
+#define COUNTS_PER_REV 1.33       // wheel encoder's no of ticks per rev
 #define WHEEL_DIAMETER 0.154      // wheel's diameter in meters
 #define PWM_BITS 10                // PWM Resolution of the microcontroller
 #define LR_WHEELS_DISTANCE 0.235  // distance between left and right wheels

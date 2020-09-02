@@ -15,47 +15,26 @@ Controller::Controller(driver motor_driver, int pwm_pin, int motor_pinA, int mot
  
 }
 
-void Controller::spin(int pwm)
+void Controller::spin(int lr, int pwm)
 {
-    switch (motor_driver_)
-    {
-        case L298:
+   
             if(pwm > 0)
             {
-                digitalWrite(motor_pinA_, HIGH);
-                digitalWrite(motor_pinB_, LOW);
+                digitalWrite(motor_pinA_, LOW);
+                if (lr == 1){
+                digitalWrite(motor_pinB_, HIGH);
+		}
+                else {digitalWrite(motor_pinB_, LOW);}
             }
             else if(pwm < 0)
             {
                 digitalWrite(motor_pinA_, LOW);
-                digitalWrite(motor_pinB_, HIGH);
+		if (lr == 1){
+                digitalWrite(motor_pinB_, LOW);
+		}
+                else {digitalWrite(motor_pinB_, HIGH);}
             }
             analogWrite(pwm_pin_, abs(pwm));
 
-            break;
-
-        case BTS7960:
-            if (pwm > 0)
-            {
-                analogWrite(motor_pinA_, 0);
-                analogWrite(motor_pinB_, abs(pwm));
-            }
-            else if (pwm < 0)
-            {
-                analogWrite(motor_pinB_, 0);
-                analogWrite(motor_pinA_, abs(pwm));
-            }
-            else
-            {
-                analogWrite(motor_pinB_, 0);
-                analogWrite(motor_pinA_, 0);
-            }
-
-            break;
-        
-        case ESC:
-            motor_.writeMicroseconds(1500 + pwm);
-
-            break;
-    }
+    
 }

@@ -28,6 +28,9 @@
 #include "Arduino.h"
 #include "Kinematics.h"
 
+bool dir1=0;
+bool dir2=0;
+
 Kinematics::Kinematics(base robot_base, int motor_max_rpm, float wheel_diameter, 
 float wheels_x_distance, float wheels_y_distance):
     base_platform(robot_base),
@@ -72,7 +75,6 @@ Kinematics::rpm Kinematics::calculateRPM(float linear_x, float linear_y, float a
     //front-right motor
     rpm.motor2 = x_rpm + y_rpm + tan_rpm;
     rpm.motor2 = constrain(rpm.motor2, -max_rpm_, max_rpm_);
-
 
     return rpm;
 }

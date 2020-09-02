@@ -20,6 +20,6 @@
         <rosparam command="load" file="$(find linorobot)/param/ekf/robot_localization.yaml" />
     </node>
 
-    <!-- Run Linorobot compatible laser drivers -->
-    <include file="$(find linorobot)/launch/include/laser.launch" />
+    <!-- Run Linorobot compatible laser drivers -
+    <include file="$(find linorobot)/launch/include/laser.launch" />-->
 </launch>
