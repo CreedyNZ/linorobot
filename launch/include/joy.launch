@@ -1,0 +1,14 @@
+<launch>
+      	<!-- JOY ROS NODE -->
+	<node respawn="true" pkg="joy" type="joy_node" name="joy" >
+      <rosparam command="load" file="$(find linorobot)/param/xbox.config.yaml" />
+     <param name="dev" type="string" value="/dev/input/js0" />
+    	<param name="deadzone" value="0.12" />
+     
+    </node>
+
+
+
+
+    <node name="Bot_Teleop_Joystick" pkg="bot_teleop_joystick" type="bot_teleop_joystick" />
+</launch>
