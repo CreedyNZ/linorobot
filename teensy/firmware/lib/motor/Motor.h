@@ -8,7 +8,7 @@ class Controller
 {
     public:
         enum driver {L298, BTS7960, ESC, BLDC};
-        Controller(driver motor_driver, int pwm_pin, int motor_pinA, int motor_pinB, int motor_pinC);
+        Controller(driver motor_driver, int pwm_pin, int motor_pinA, int motor_pinB, int motor_pinC, int fwd);
         void spin(int pwm);
 
     private:
@@ -17,7 +17,8 @@ class Controller
         int pwm_pin_;
         int motor_pinA_;
         int motor_pinB_;
-        int motor_pinC_:
+        int motor_pinC_;
+        int fwd_;
 };
  
 #endif

@@ -1,11 +1,12 @@
 #include "Motor.h"
 
-Controller::Controller(driver motor_driver, int pwm_pin, int motor_pinA, int motor_pinB, int motor_pinC):
+Controller::Controller(driver motor_driver, int pwm_pin, int motor_pinA, int motor_pinB, int motor_pinC, int fwd):
     motor_driver_(motor_driver),
     pwm_pin_(pwm_pin),
     motor_pinA_(motor_pinA),
     motor_pinB_(motor_pinB),
-    motor_pinC_(motor_pinC)
+    motor_pinC_(motor_pinC),
+    fwd_(fwd)
 {
     switch (motor_driver)
     {
@@ -25,7 +26,6 @@ Controller::Controller(driver motor_driver, int pwm_pin, int motor_pinA, int mot
             pinMode(motor_pinB_, OUTPUT);
             pinMode(motor_pinC_, OUTPUT);
             
-
             //ensure that the motor is in neutral state during bootup
             analogWrite(pwm_pin_, abs(0));
 
@@ -52,9 +52,10 @@ Controller::Controller(driver motor_driver, int pwm_pin, int motor_pinA, int mot
 }
 
 void Controller::spin(int pwm)
-{
+{   bool dir = LOW;
     switch (motor_driver_)
     {
+        
         case L298:
             if(pwm > 0)
             {
@@ -71,18 +72,22 @@ void Controller::spin(int pwm)
             break;
 
          case BLDC:
-           digitalWrite(motor_pinC_, LOW);
+           digitalWrite(motor_pinA_, LOW);
+           digitalWrite(motor_pinB_, LOW);
            if(pwm > 0)
             {
-                digitalWrite(motor_pinA_, LOW);
-                digitalWrite(motor_pinB_, LOW);
-            }
-            else if(pwm < 0)
+              dir = LOW;
+             }
+                             
+            else if(pwm < 0 )
             {
-                digitalWrite(motor_pinA_, LOW);
-                digitalWrite(motor_pinB_, HIGH);
+               dir = HIGH;
             }
-            analogWrite(pwm_pin_, abs(pwm));
+            if (fwd_ == 1){
+            dir = !dir;
+            }
+           digitalWrite(motor_pinC_, dir);
+           analogWrite(pwm_pin_, abs(pwm));
 
             break;
             
