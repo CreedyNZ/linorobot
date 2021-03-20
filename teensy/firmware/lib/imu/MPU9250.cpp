@@ -40,7 +40,7 @@ THE SOFTWARE.
  * @see MPU9250_DEFAULT_ADDRESS
  */
 MPU9250::MPU9250() {
-    devAddr = MPU9250_DEFAULT_ADDRESS;
+    devAddr = MPU9250_ADDRESS_AD0_LOW;
 }
 
 /** Specific address constructor.
@@ -74,7 +74,7 @@ void MPU9250::initialize() {
 bool MPU9250::testConnection() {
     uint8_t device_id = getDeviceID();
 
-    if(device_id == 0x38 || device_id == 0x71)
+    if(device_id == 0x39 || device_id == 0x71)
         return true;
     else 
         return false;

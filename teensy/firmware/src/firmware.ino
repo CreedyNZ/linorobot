@@ -37,10 +37,10 @@ Encoder motor4_encoder(MOTOR4_ENCODER_A, MOTOR4_ENCODER_B, COUNTS_PER_REV);
 
 Servo steering_servo;
 
-Controller motor1_controller(Controller::MOTOR_DRIVER, MOTOR1_PWM, MOTOR1_IN_A, MOTOR1_IN_B);
-Controller motor2_controller(Controller::MOTOR_DRIVER, MOTOR2_PWM, MOTOR2_IN_A, MOTOR2_IN_B); 
-Controller motor3_controller(Controller::MOTOR_DRIVER, MOTOR3_PWM, MOTOR3_IN_A, MOTOR3_IN_B);
-Controller motor4_controller(Controller::MOTOR_DRIVER, MOTOR4_PWM, MOTOR4_IN_A, MOTOR4_IN_B);
+Controller motor1_controller(Controller::MOTOR_DRIVER, MOTOR1_PWM, MOTOR1_IN_A, MOTOR1_IN_B, MOTOR1_IN_C, 1);
+Controller motor2_controller(Controller::MOTOR_DRIVER, MOTOR2_PWM, MOTOR2_IN_A, MOTOR2_IN_B, MOTOR2_IN_C, 2); 
+Controller motor3_controller(Controller::MOTOR_DRIVER, MOTOR3_PWM, MOTOR3_IN_A, MOTOR3_IN_B, MOTOR3_IN_C, 1); 
+Controller motor4_controller(Controller::MOTOR_DRIVER, MOTOR4_PWM, MOTOR4_IN_A, MOTOR4_IN_B, MOTOR4_IN_C, 2); 
 
 PID motor1_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
 PID motor2_pid(PWM_MIN, PWM_MAX, K_P, K_I, K_D);
@@ -52,6 +52,10 @@ Kinematics kinematics(Kinematics::LINO_BASE, MAX_RPM, WHEEL_DIAMETER, FR_WHEELS_
 float g_req_linear_vel_x = 0;
 float g_req_linear_vel_y = 0;
 float g_req_angular_vel_z = 0;
+long int debugA1;
+long int debugB2;
+long int debugA2;
+long int debugB1;
 
 unsigned long g_prev_command_time = 0;
 
@@ -74,6 +78,7 @@ void setup()
 {
     steering_servo.attach(STEERING_PIN);
     steering_servo.write(90); 
+    analogWriteResolution(10);  
     
     nh.initNode();
     nh.getHardware()->setBaud(57600);
@@ -126,7 +131,7 @@ void loop()
         else
         {
             publishIMU();
-        }
+       }
         prev_imu_time = millis();
     }
 
@@ -179,8 +184,15 @@ void moveBase()
     //the PWM value sent to the motor driver is the calculated PID based on required RPM vs measured RPM
     motor1_controller.spin(motor1_pid.compute(req_rpm.motor1, current_rpm1));
     motor2_controller.spin(motor2_pid.compute(req_rpm.motor2, current_rpm2));
-    motor3_controller.spin(motor3_pid.compute(req_rpm.motor3, current_rpm3));  
-    motor4_controller.spin(motor4_pid.compute(req_rpm.motor4, current_rpm4));    
+      motor3_controller.spin(motor3_pid.compute(req_rpm.motor3, current_rpm3));  
+      motor4_controller.spin(motor4_pid.compute(req_rpm.motor4, current_rpm4));
+//      motor1_controller.spin(req_rpm.motor1);
+//      motor2_controller.spin(req_rpm.motor2);
+    
+    debugA1 =  req_rpm.motor1;
+    debugA2 =  req_rpm.motor2;
+    debugB1 =  current_rpm1;
+    debugB2 =  current_rpm2;
 
     Kinematics::velocities current_vel;
 
@@ -253,8 +265,13 @@ void printDebug()
     nh.loginfo(buffer);
     sprintf (buffer, "Encoder FrontRight : %ld", motor2_encoder.read());
     nh.loginfo(buffer);
-    sprintf (buffer, "Encoder RearLeft   : %ld", motor3_encoder.read());
+    sprintf (buffer, "RPM FrontLeft  : %ld", debugA1);
     nh.loginfo(buffer);
-    sprintf (buffer, "Encoder RearRight  : %ld", motor4_encoder.read());
+    sprintf (buffer, "RPM FrontRight : %ld", debugB1);
     nh.loginfo(buffer);
+    sprintf (buffer, "RPM FrontLeft  : %ld", debugA2);
+    nh.loginfo(buffer);
+    sprintf (buffer, "RPM FrontRight : %ld", debugB2);
+    nh.loginfo(buffer);
+
 }
